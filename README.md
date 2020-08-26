@@ -23,6 +23,26 @@ rename the file to .env.  Run the script ``generate_financial_data.py``.  A samp
 
 ## Query Examples
 * Basic filter
+    * Customers in Texas:
+    
+      ``db.customerAccounts.find({"state":"Texas"}``
+      
+    * Customers in Texas with Projection:
+    
+      ``db.customerAccounts.find({"state":"Texas"}, {_id: 0, customerId: 1, customerSinceDate: 1})``
+      
+    * Customers in Texas with Projection sorted by customerSinceDate in descending order:
+    
+    ``db.customerAccounts.find({"state":"Texas"}, {_id: 0, customerId: 1, customerSinceDate: 1}).sort({customerSinceDate: -1})``
+    
+    * Customers in Texas OR Delaware
+    
+    ``db.customerAccounts.find({state:{$in:['Texas', 'Delaware']}}, {_id:0, customerId: 1, state: 1} )``
+    
+    * Customers in Texas OR Delaware and are new customers this year
+    
+    ``db.customerAccounts.find({state:{$in:['Texas', 'Delaware']}, customerSinceDate: {$gte:ISODate('2020-01-01')}}, {_id: 0, state: 1, customerSinceDate: 1})``  
+    
 * Filter on embedded object/array
 * Filter based on regular expression
 * Existence check/Equality filter
