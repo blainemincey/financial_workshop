@@ -21,6 +21,8 @@ After installing the required Python modules, modify the appropriate values in t
 rename the file to .env.  Run the script ``generate_financial_data.py``.  A sample JSON document is indicated below.
 ![](img/samplejson.jpg)
 
+#### Note: Based on the dynamic data that is generated, the filters in the examples may have to be modified accordingly.
+
 ## Query Examples
 * Basic filter
     * Customers in Texas:
@@ -43,14 +45,14 @@ rename the file to .env.  Run the script ``generate_financial_data.py``.  A samp
             {_id: 0, customerId: 1, customerSinceDate: 1}).sort({customerSinceDate: -1})
         ```
     
-    * Customers in Texas OR Delaware
+    * Customers in Texas OR Delaware:
     
         ```
         db.customerAccounts.find({state:{$in:['Texas', 'Delaware']}}, 
             {_id:0, customerId: 1, state: 1} )
         ```
     
-    * Customers in Texas OR Delaware and are new customers this year
+    * Customers in Texas OR Delaware and are new customers this year:
     
         ```
         db.customerAccounts.find({state:{$in:['Texas', 'Delaware']}, 
@@ -59,9 +61,46 @@ rename the file to .env.  Run the script ``generate_financial_data.py``.  A samp
         ```  
     
 * Filter on embedded object/array
+    * Customers with a ONLY a Savings Account:
+        ```
+        db.customerAccounts.find({ accounts:{$size:1}, "accounts.accountType":"savings" }, 
+            {_id:0, name:1, "accounts.accountType":1, "accounts.balance":1})
+        ```
+    
+    * Customers with ONLY a Savings Account and a balance > $25000:
+        ```
+        db.customerAccounts.find({ accounts:{$size:1}, "accounts.accountType":"savings", "accounts.balance":{$gt:25000} }, 
+            {_id:0, name:1, "accounts.accountType":1, "accounts.balance":1})
+        ```
+    
+    * Customers with a Checking Account with a negative balance:
+        ```
+        db.customerAccounts.find({ "accounts.accountType":"checking", "accounts.balance":{$lt:0} }, 
+            {_id:0, name:1, "accounts.accountType":1, "accounts.balance":1})
+        ```
+    
+    * Customers with both a Savings and Checking account:
+        ```
+        db.customerAccounts.find({ "accounts.accountType":{$all:["savings","checking"]}}, 
+            {_id:0, name:1, "accounts.accountType":1, "accounts.balance":1})
+        ```
+    
+    
 * Filter based on regular expression
+    * Customer with name starting with 'Andrew'
+    
+    * Customers with a '@gmail.com' email address and a customer for more than 5 years:
+
+
 * Existence check/Equality filter
+    * Customers in NY without a Savings account:
+    
+    * Customers in NY without a Checking account:
+    
+    * Customers from a previous bank:
+    
 * Explain Plan/Indexes
+    * Customers with a Savings Account Interest Rate > 3%
 
 ## Aggregation Framework
 * Basic aggregation
