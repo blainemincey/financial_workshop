@@ -88,19 +88,58 @@ rename the file to .env.  Run the script ``generate_financial_data.py``.  A samp
     
 * Filter based on regular expression
     * Customer with name starting with 'Andrew'
+        ```
+        db.customerAccounts.find({name: /^Andrew/}, {_id:0, name: 1})
+        ```
     
     * Customers with a '@gmail.com' email address and a customer for more than 5 years:
+        ```
+        db.customerAccounts.find({email:/gmail.com$/, customerSinceDate:{$lte:ISODate('2015-08-27')}}, 
+            {_id:0,email:1, customerSinceDate:1})
+        ```
 
 
 * Existence check/Equality filter
-    * Customers in NY without a Savings account:
+    * Number of customers without a Savings account:
+        ```
+      db.customerAccounts.find({accounts:{$size:1}, 
+            "accounts.accountType":"checking"}).size()
+        ```
     
-    * Customers in NY without a Checking account:
-    
-    * Customers from a previous bank:
+    * Number of customers from a previous bank:
+        ```
+        db.customerAccounts.find({previousBank:{$exists:true}}).size()
+        ```
+      
+    * Customers with a name NOT starting with Andrew
+        ```
+        db.customerAccounts.find( { name: { $not: { $regex: "^Andrew" } } } , {_id:0, name:1})
+        ```
     
 * Explain Plan/Indexes
     * Customers with a Savings Account Interest Rate > 3%
+        ```
+        db.customerAccounts.find({ "accounts.accountType":"savings", "accounts.interestRate":{$gt:3}}, {_id:0, name:1, "accounts.interestRate":1})
+        ```
+      
+    * Use an Explain Plan to look at performance:
+        ```
+        db.customerAccounts.find({ "accounts.accountType":"savings", "accounts.interestRate":{$gt:3}}).explain()
+        ```
+      
+    * The explain plan should indicate a *COLLSCAN* or collection scan.  We will now
+      create an index:
+        ```
+        db.customerAccounts.createIndex({"accounts.interestRate": 1})
+        ```
+      
+    * List the current indexes to make sure index was created:
+        ```
+        db.customerAccounts.getIndexes()
+        ```
+      
+    * Now with the created index, re-run the explain plan in the earlier step. You should
+      see an entry in the output indicating both a *FETCH* and *IXSCAN*.
 
 ## Aggregation Framework
 * Basic aggregation
