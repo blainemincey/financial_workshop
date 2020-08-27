@@ -143,7 +143,54 @@ rename the file to .env.  Run the script ``generate_financial_data.py``.  A samp
 
 ## Aggregation Framework
 * Basic aggregation
+    * What is the most popular month for new customers to join:
+        ```
+        db.customerAccounts.aggregate([
+            {$project: {monthJoined: {$month:"$customerSinceDate"} }}, 
+            {$group: { _id : {monthJoined:"$monthJoined"} ,
+            number : { $sum : 1 }}}, 
+            {$sort: {   number: -1 }}, {$limit: 1}])
+        ```
+
+    * What month is the most popular for new customers to join in the state of GA:
+        ```
+        db.customerAccounts.aggregate([
+                    {$match: {   state:"Georgia" }}, 
+                    {$project: {   monthJoined: {$month:"$customerSinceDate"} }}, 
+                    {$group: {   
+                        _id : {     monthJoined:"$monthJoined"} ,      
+                                    number : { $sum : 1 }     }  }, 
+                    {$sort: {   "number": -1 }}, {$limit: 1}])
+        ```
 * Complex aggregation
+    * Which state has the largest savings account balance:
+        ```
+        db.customerAccounts.aggregate([
+            {$unwind: {   path: "$accounts" }}, 
+            {$match: {   "accounts.accountType":"savings" }}, 
+            {$group: {   _id: {state:"$state"},   totalBalance: {     $sum: "$accounts.balance"   } }}, {$sort: {   totalBalance: -1 }}])
+        ```
+         *Try to find the avg balance   
+         
+    * Which state has the highest average interest rate for savings accounts:
+        ```
+        db.customerAccounts.aggregate([
+            {$unwind: {   path: "$accounts" }}, 
+            {$match: {   "accounts.accountType":"savings" }}, 
+            {$group: {   _id: {state:"$state"},   
+                avgIntRate: {     $avg: "$accounts.interestRate"   } }}, 
+            {$sort: {   avgIntRate: -1 }}])
+        ```
+    * What is the name of the customer with the largest negative checking account balance:
+        ```
+        db.customerAccounts.aggregate([
+                {$unwind: {   path: "$accounts" }}, 
+                {$match: {   "accounts.accountType":"checking",   "accounts.balance": {$lt:0} }}, 
+                {$sort: {   "accounts.balance": 1 }}, 
+                {$project: {   _id:0,   name:1,   state:1,   "accounts.balance":1 }}, 
+                {$limit: 1}])
+        ```
+      
 * Statistical/Mathematical aggregation
 
 ## Text Search
