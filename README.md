@@ -13,7 +13,6 @@ to utilize a variety of elements of the MongoDB Query Language (MQL) and the Mon
 2. Query Examples
 3. Aggregation Framework
 4. Text Search
-5. Change Stream Example
 
 ## Generate Financial Data
 To generate financial data, use the following [Python Data Generator](https://github.com/blainemincey/generate_sample_data).
