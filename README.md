@@ -190,14 +190,32 @@ rename the file to .env.  Run the script ``generate_financial_data.py``.  A samp
                 {$project: {   _id:0,   name:1,   state:1,   "accounts.balance":1 }}, 
                 {$limit: 1}])
         ```
-      
-* Statistical/Mathematical aggregation
+    #### For additional assistance on using the Aggregation Framework if coming from SQL, be sure to consult the following [SQL to Aggregation Mapping Chart](https://docs.mongodb.com/manual/reference/sql-aggregation-comparison/).
 
 ## Text Search
-* Text Search example
+* In order to use the text search capabilities in MongoDB, you have to first create a 
+text index:
+    ```
+    db.customerAccounts.createIndex( { previousBank:"text" } )
+    ```
+  
+  * Search for company name with 'Strong' or 'Ward':
+    ```
+    db.customerAccounts.find( { $text: { $search: "Strong Ward" } } )
+    ```
+  
+  * Search for company name with 'Strong' and NOT 'Ward':
+    ```
+    db.customerAccounts.find( { $text: { $search: " Strong -Ward" } } )
+    ```
+  
+  * Search and sort by relevance score:
+    ```
+    db.customerAccounts.find(    { $text: { $search: "Strong Ward" } },    
+        { score: { $meta: "textScore" } } ).sort( { score: { $meta: "textScore" } } ).limit(5)
+    ```
 
-## Change Stream Example
-** time permitting - change streams/change data capture
+
 
 
 
